@@ -41,6 +41,7 @@ class Array(list):
         """Return a stored value at the given index."""
         rlev = self.get_rle(index)
         return self._default if not rlev else rlev[2]
+    __getitem__ = get_value
 
     def get_values(self):
         """Return all stored values in the Array instance."""
@@ -118,6 +119,7 @@ class Array(list):
             length = len(list(group))
             self.append((length, position, value))
             position += length
+    __setitem__ = set_value
 
     def delete_rle(self, index):
         """Delete the RLE field that contains the given index."""
@@ -134,7 +136,7 @@ class Array(list):
         groupindex = self.get_rle_index(index)
         if groupindex is None or not self:
             return None
-        rlev = self[groupindex]
+        rlev = super(Array, self).__getitem__(groupindex)
 
         if rlev[0] <= 1:
             return self.delete_rle(index)
@@ -144,3 +146,4 @@ class Array(list):
         else:
             super(Array, self).__setitem__(groupindex,
                                            (rlev[0]-1, rlev[1], rlev[2]))
+    __delitem__ = delete_value
