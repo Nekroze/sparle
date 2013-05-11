@@ -49,7 +49,7 @@ class Array(object):
         """Return a stored value at the given index."""
         if isinstance(index, slice):
             return [self.get_value(pos)
-                    for pos in xrange(*index.indices(len(self)+1))]
+                    for pos in xrange(*index.indices(len(self)))]
         rlev = self.get_rle(index)
         return self._default if not rlev else rlev[2]
 
@@ -96,7 +96,7 @@ class Array(object):
 
     def set_value(self, index, value):
         """Store the given value at the index position."""
-        if False and isinstance(index, slice):
+        if isinstance(index, slice):
             for pos, val in zip(xrange(*index.indices(len(self))), value):
                 self.set_value(pos, val)
             return None
@@ -167,7 +167,7 @@ class Array(object):
 
     def __len__(self):
         """Return the length of defined values."""
-        return self.sparle[-1][1] - self.sparle[0][1]
+        return self.sparle[-1][1] + self.sparle[-1][0] - self.sparle[0][1]
 
     def __contains__(self, value):
         """Return True if the Array contains the given value."""
