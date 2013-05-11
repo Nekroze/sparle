@@ -98,6 +98,7 @@ class Array(object):
         """Store the given value at the index position."""
         if isinstance(index, slice):
             for pos, val in zip(xrange(*index.indices(len(self))), value):
+                print pos, val
                 self.set_value(pos, val)
             return None
 
