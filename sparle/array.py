@@ -11,17 +11,39 @@ except ImportError:
 
 
 class Array(list):
-    def __init__(self, default):
-        self._default = default
+    """
+    This is a reimplementation of a python list that utilizes Sparse Positional
+    Aware Run-Length Encoding. This class can be used completely transparently.
+
+    Behind the scenes the dynamic Array will use Run-Length Encoding to
+    compress repitition of values into a single entry. The Array can also
+    not store any entries of a specific value that is given as the default.
+    This default will be returned when retreiving an unset index.
+
+    By combining these the Array can space at the slight cost of performance
+    especially when storing an array of highly repeating values that may have a
+    single more common value. A good example of this might be a voxel
+    representation of space, Much of the space may be the same values in a row
+    or empty space that can be represented by the default value.
+    """
+    def __init__(self, values=None, default=0):
+        """Encode the given values and set the default value."""
         super(Array, self).__init__()
+        self._default = default
+        if values:
+            self.set_values(values)
 
     def rle_values(self):
+        """Return a full slice of the underlying RLE list."""
         return self[:]
 
     def get_value(self, index):
-        return self.get_rle(index)[2]
+        """Return a stored value at the given index."""
+        rlev = self.get_rle(index)
+        return self._default if not rlev else rlev[2]
 
     def get_values(self):
+        """Return all stored values in the Array instance."""
         output = list()
         if self[:][0][1]:
             output.append(self._default)
@@ -39,19 +61,30 @@ class Array(list):
         return output
 
     def get_rle(self, index):
+        """Get the RLE field that contains the given index else None."""
+        groupindex = self.get_rle_index(index)
+        return None if groupindex is None else self.rle_values()[groupindex]
+
+    def get_rle_index(self, index):
+        """Get the index of the RLE field that contians the given index."""
         if not len(self):
-            return self._default
+            return None
         rles = self.rle_values()
 
         keys = [r[1] for r in rles]
         groupindex = bisect_left(keys, index)
-        if groupindex >= len(self) or rles[groupindex][1] > index:
-            return self._default
-        return rles[groupindex]
+        if groupindex >= len(self):
+            return None
+        if rles[groupindex][1] > index:
+            groupindex -= 1
+        if groupindex < 0:
+            return None
+        return groupindex
 
     def set_value(self, index, value):
+        """Store the given value at the index position."""
         if value == self._default:
-            return None
+            return self.delete_value(index)
         if not len(self):
             return self.append((1, index, value))
         rles = self.rle_values()
@@ -75,6 +108,7 @@ class Array(list):
         rles[start:end + 1] = encoded
 
     def set_values(self, values):
+        """Erase the Array then encode and store all values."""
         self[:] = []
         groups = groupby(values)
         position = 0
@@ -86,6 +120,7 @@ class Array(list):
             position += length
 
     def delete_rle(self, index):
+        """Delete the RLE field that contains the given index."""
         rles = self.rle_values()
 
         keys = [r[1] for r in rles]
@@ -95,12 +130,17 @@ class Array(list):
         super(Array, self).__delitem__(group)
 
     def delete_value(self, index):
-        rlev = self.get_rle(index)
-        if rlev is None:
+        """Delete the single value at the given index."""
+        groupindex = self.get_rle_index(index)
+        if groupindex is None or not self:
             return None
+        rlev = self[groupindex]
 
         if rlev[0] <= 1:
             return self.delete_rle(index)
         elif rlev[1] == index:
-            rlev[1] += 1
-        rlev[0] -= 1
+            super(Array, self).__setitem__(groupindex,
+                                           (rlev[0]-1, rlev[1]+1, rlev[2]))
+        else:
+            super(Array, self).__setitem__(groupindex,
+                                           (rlev[0]-1, rlev[1], rlev[2]))
