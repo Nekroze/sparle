@@ -3,7 +3,6 @@ __author__ = 'Taylor "Nekroze" Lawson'
 __email__ = 'nekroze@eturnilnetwork.com'
 from itertools import groupby
 from bisect import bisect_left
-import sys
 from . import rle
 try:
     from blist import blist as list
@@ -53,7 +52,10 @@ class Array(object):
                     for pos in xrange(*index.indices(len(self)+1))]
         rlev = self.get_rle(index)
         return self._default if not rlev else rlev[2]
-    __getitem__ = get_value
+
+    def __getitem__(self, index):
+        """Array.get_value passthrough."""
+        return self.get_value(index)
 
     def get_values(self):
         """Return all stored values in the Array instance."""
@@ -119,8 +121,7 @@ class Array(object):
         groupstart = self.sparle[start][1]
         values[index - groupstart] = value
 
-        encoded = rle.encode(values, offset=groupstart)
-        self.sparle[start:end + 1] = encoded
+        self.sparle[start:end + 1] = rle.encode(values, offset=groupstart)
 
     def set_values(self, values):
         """Erase the Array then encode and store all values."""
@@ -133,7 +134,10 @@ class Array(object):
             length = len(list(group))
             self.sparle.append((length, position, value))
             position += length
-    __setitem__ = set_value
+
+    def __setitem__(self, index, value):
+        """Array.set_value passthrough."""
+        return self.set_value(index, value)
 
     def delete_rle(self, index):
         """Delete the RLE field that contains the given index."""
@@ -156,7 +160,10 @@ class Array(object):
             self.sparle[groupindex] = (rlev[0]-1, rlev[1]+1, rlev[2])
         else:
             self.sparle[groupindex] = (rlev[0]-1, rlev[1], rlev[2])
-    __delitem__ = delete_value
+
+    def __delitem__(self, index):
+        """Array.delete_value passthrough."""
+        return self.delete_value(index)
 
     def __len__(self):
         """Return the length of defined values."""
