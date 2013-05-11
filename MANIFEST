@@ -3,5 +3,5 @@ README.rst
 setup.py
 sparle/__init__.py
 sparle/array.py
-sparle/rle.py
+sparle/parle.py
 test/test_array.py

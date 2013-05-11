@@ -1,9 +1,7 @@
 """An implementation of a SPARLE array."""
 __author__ = 'Taylor "Nekroze" Lawson'
 __email__ = 'nekroze@eturnilnetwork.com'
-from itertools import groupby
-from bisect import bisect_left
-from . import rle
+from . import parle
 try:
     from blist import blist as list
 except ImportError:
@@ -31,7 +29,7 @@ class Array(object):
         self.sparle = list()
         self._default = default
         if values:
-            self.set_values(values)
+            parle.set_values(self.sparle, values, self._default)
 
     def rle_values(self):
         """Return a full slice of the underlying RLE list."""
@@ -45,126 +43,34 @@ class Array(object):
         """Return the first stored value."""
         return self.sparle[-1][2]
 
-    def get_value(self, index):
+    def __getitem__(self, index):
         """Return a stored value at the given index."""
         if isinstance(index, slice):
-            return [self.get_value(pos)
+            return [parle.get_value(self.sparle, pos, self._default)
                     for pos in xrange(*index.indices(len(self)))]
-        rlev = self.get_rle(index)
-        return self._default if not rlev else rlev[2]
-
-    def __getitem__(self, index):
-        """Array.get_value passthrough."""
-        return self.get_value(index)
+        return parle.get_value(self.sparle, index, self._default)
 
     def get_values(self):
         """Return all stored values in the Array instance."""
-        output = list()
-        if self.sparle[0][1]:
-            output.append(self._default)
-            output *= self.sparle[0][1]
+        return parle.get_values(self.sparle, self._default)
 
-        for length, pos, value in self.sparle:
-            if pos >= len(output):
-                temp = list([self._default])
-                temp *= pos - len(output)
-                output.extend(temp)
-
-            temp = list([value])
-            temp *= length
-            output.extend(temp)
-        return output
-
-    def get_rle(self, index):
-        """Get the RLE field that contains the given index else None."""
-        groupindex = self.get_rle_index(index)
-        return None if groupindex is None else self.rle_values()[groupindex]
-
-    def get_rle_index(self, index):
-        """Get the index of the RLE field that contians the given index."""
-        if not len(self.sparle):
-            return None
-        keys = [r[1] for r in self.sparle]
-        groupindex = bisect_left(keys, index)
-        if groupindex >= len(self.sparle):
-            return None
-        if self.sparle[groupindex][1] > index:
-            groupindex -= 1
-        if groupindex < 0:
-            return None
-        return groupindex
-
-    def set_value(self, index, value):
+    def __setitem__(self, index, value):
         """Store the given value at the index position."""
         if isinstance(index, slice):
             for pos, val in zip(xrange(*index.indices(len(self))), value):
                 print pos, val
-                self.set_value(pos, val)
+                parle.set_value(self.sparle, pos, val, self._default)
             return None
-
-        if value == self._default:
-            return self.delete_value(index)
-        if not len(self.sparle):
-            return self.sparle.append((1, index, value))
-
-        keys = [r[1] for r in self.sparle]
-        group = bisect_left(keys, index)
-        if group >= len(self.sparle):
-            group -= 1
-        if self.sparle[group][1] > index:
-            group -= 1
-
-        start = group - 1 if group > 0 else group
-        end = group + 1 if group < len(self.sparle) else group
-
-        values = sum([length * [item] for length, _, item in
-                      self.sparle[start:end+1]], [])
-        groupstart = self.sparle[start][1]
-        values[index - groupstart] = value
-
-        self.sparle[start:end + 1] = rle.encode(values, offset=groupstart)
+        else:
+            return parle.set_value(self.sparle, index, value, self._default)
 
     def set_values(self, values):
         """Erase the Array then encode and store all values."""
-        del self.sparle[:]
-        groups = groupby(values)
-        position = 0
-        for value, group in groups:
-            if value == self._default:
-                continue
-            length = len(list(group))
-            self.sparle.append((length, position, value))
-            position += length
-
-    def __setitem__(self, index, value):
-        """Array.set_value passthrough."""
-        return self.set_value(index, value)
-
-    def delete_rle(self, index):
-        """Delete the RLE field that contains the given index."""
-        keys = [r[1] for r in self.sparle]
-        group = bisect_left(keys, index)
-        if group >= len(self.sparle) or self.sparle[group][1] > index:
-            return None
-        del self.sparle[group]
-
-    def delete_value(self, index):
-        """Delete the single value at the given index."""
-        groupindex = self.get_rle_index(index)
-        if groupindex is None or not self:
-            return None
-        rlev = self.sparle[groupindex]
-
-        if rlev[0] <= 1:
-            return self.delete_rle(index)
-        elif rlev[1] == index:
-            self.sparle[groupindex] = (rlev[0]-1, rlev[1]+1, rlev[2])
-        else:
-            self.sparle[groupindex] = (rlev[0]-1, rlev[1], rlev[2])
+        return parle.set_values(self.sparle, values, self._default)
 
     def __delitem__(self, index):
-        """Array.delete_value passthrough."""
-        return self.delete_value(index)
+        """Delete the single value at the given index."""
+        return parle.delete_value(self.sparle, index)
 
     def __len__(self):
         """Return the length of defined values."""
