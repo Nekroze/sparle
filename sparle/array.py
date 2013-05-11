@@ -3,6 +3,7 @@ __author__ = 'Taylor "Nekroze" Lawson'
 __email__ = 'nekroze@eturnilnetwork.com'
 from itertools import groupby
 from bisect import bisect_left
+import sys
 from . import rle
 try:
     from blist import blist as list
@@ -47,6 +48,9 @@ class Array(object):
 
     def get_value(self, index):
         """Return a stored value at the given index."""
+        if isinstance(index, slice):
+            return [self.get_value(pos)
+                    for pos in xrange(*index.indices(len(self)+1))]
         rlev = self.get_rle(index)
         return self._default if not rlev else rlev[2]
     __getitem__ = get_value
@@ -90,6 +94,11 @@ class Array(object):
 
     def set_value(self, index, value):
         """Store the given value at the index position."""
+        if False and isinstance(index, slice):
+            for pos, val in zip(xrange(*index.indices(len(self))), value):
+                self.set_value(pos, val)
+            return None
+
         if value == self._default:
             return self.delete_value(index)
         if not len(self.sparle):
@@ -149,6 +158,10 @@ class Array(object):
             self.sparle[groupindex] = (rlev[0]-1, rlev[1], rlev[2])
     __delitem__ = delete_value
 
+    def __len__(self):
+        """Return the length of defined values."""
+        return self.sparle[-1][1] - self.sparle[0][1]
+
     def __contains__(self, value):
         """Return True if the Array contains the given value."""
         return value in [r[2] for r in self.sparle]
@@ -162,12 +175,3 @@ class Array(object):
         """Iterate in reverse over each value and its index."""
         return (((relv[2], relv[1] + relv[0] - pos)
                  for pos in xrange(relv[0])) for relv in self.sparle[::-1])
-
-    def __getslice__(self, start, stop):
-        """Return a slice of decoded values between start and stop."""
-        return self.get_values()[start:stop]
-
-    def __setslice__(self, start, stop, sequence):
-        """Set a slice of decoded values between start and stop."""
-        for index, pos in enumerate(xrange(start, stop)):
-            self.set_value(pos, sequence[index])
