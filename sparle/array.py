@@ -35,7 +35,7 @@ class Array(list):
 
     def rle_values(self):
         """Return a full slice of the underlying RLE list."""
-        return self[:]
+        return list(self)
 
     def get_value(self, index):
         """Return a stored value at the given index."""
@@ -46,11 +46,11 @@ class Array(list):
     def get_values(self):
         """Return all stored values in the Array instance."""
         output = list()
-        if self[:][0][1]:
+        if self.rle_values()[0][1]:
             output.append(self._default)
-            output *= self[:][0][1]
+            output *= self.rle_values()[0][1]
 
-        for length, pos, value in self[:]:
+        for length, pos, value in self.rle_values():
             if pos >= len(output):
                 temp = list([self._default])
                 temp *= pos - len(output)
@@ -101,7 +101,7 @@ class Array(list):
         end = group + 1 if group < len(rles) else group
 
         values = sum([length * [item] for length, _, item in
-                      rles[start:end+1]], list())
+                      rles[start:end+1]], [])
         groupstart = rles[start][1]
         values[index - groupstart] = value
 
@@ -110,7 +110,7 @@ class Array(list):
 
     def set_values(self, values):
         """Erase the Array then encode and store all values."""
-        self[:] = []
+        del self[:]
         groups = groupby(values)
         position = 0
         for value, group in groups:
@@ -147,3 +147,16 @@ class Array(list):
             super(Array, self).__setitem__(groupindex,
                                            (rlev[0]-1, rlev[1], rlev[2]))
     __delitem__ = delete_value
+
+    def __contains__(self, value):
+        """Return True if the Array contains the given value."""
+        return value in [r[2] for r in self.rle_values()]
+
+    def __getslice__(self, start, stop):
+        """Return a slice of decoded values between start and stop."""
+        return self.get_values()[start:stop]
+
+    def __setslice__(self, start, stop, sequence):
+        """Set a slice of decoded values between start and stop."""
+        for pos, value in zip(xrange(start, stop), sequence):
+            self.set_value(pos, value)
