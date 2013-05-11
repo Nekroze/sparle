@@ -73,3 +73,20 @@ class Test_SPARLE_Array(object):
         arr.delete_value(1)
         assert arr[1] == 0
         assert arr[2] == data[2]
+
+    def test_contains(self):
+        arr = Array(data)
+
+        assert data[2] in arr
+        assert "a" not in arr
+
+    def test_get_slice(self):
+        arr = Array(data)
+
+        assert arr[1:-1] == data[1:-1]
+
+    def test_set_slice(self):
+        arr = Array(data)
+
+        arr[1:-1] = [2, 2]
+        assert arr[:] == [data[0], 2, 2, data[-1]]
