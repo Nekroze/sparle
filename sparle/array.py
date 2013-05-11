@@ -37,6 +37,14 @@ class Array(list):
         """Return a full slice of the underlying RLE list."""
         return list(self)
 
+    def get_bottom(self):
+        """Return the first stored value."""
+        return self.rle_values()[0][2]
+
+    def get_top(self):
+        """Return the first stored value."""
+        return self.rle_values()[-1][2]
+
     def get_value(self, index):
         """Return a stored value at the given index."""
         rlev = self.get_rle(index)
