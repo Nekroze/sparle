@@ -84,3 +84,8 @@ class Test_SPARLE_Array(object):
         assert arr.sparle == expected + [(1, 10, 100)]
         assert arr.get_values() == expecteddata
         assert arr[:] == expecteddata
+
+        del arr[0]
+        assert len(arr) == len(expecteddata)
+        assert arr.get_values() == [0] + expecteddata[1:]
+        assert arr[:] == [0] + expecteddata[1:]

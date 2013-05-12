@@ -76,7 +76,7 @@ class Array(object):
 
     def __len__(self):
         """Return the length of defined values."""
-        return self.sparle[-1][1] + self.sparle[-1][0] - self.sparle[0][1]
+        return self.sparle[-1][1] + self.sparle[-1][0]
 
     def __contains__(self, value):
         """Return True if the Array contains the given value."""
