@@ -60,8 +60,11 @@ class Array(object):
     def __setitem__(self, index, value):
         """Store the given value at the index position."""
         if isinstance(index, slice):
-            for pos, val in zip(xrange(*index.indices(len(self))), value):
-                parle.set_value(self.sparle, pos, val, self._default)
+            self.sparle = parle.set_value_slice(self.sparle, value,
+                                                self._default,
+                                                *index.indices(len(self)))
+            #for pos, val in zip(xrange(*index.indices(len(self))), value):
+            #    parle.set_value(self.sparle, pos, val, self._default)
         else:
             return parle.set_value(self.sparle, index, value, self._default)
 

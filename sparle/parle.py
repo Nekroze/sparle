@@ -102,6 +102,14 @@ def get_value_slice(rles, default, start, stop, step):
     return (first + mid + last) if step == 1 else (first + mid + last)[::step]
 
 
+def set_value_slice(rles, values, default, start, stop, step):
+    """Set a slice of values."""
+    rlevs = decode(rles, default)
+    rlevs[start:stop:step] = values
+    rles = encode(rlevs, default)
+    return rles
+
+
 def set_value(rles, index, value, default):
     """Store the given value at the index position."""
     if value == default:
