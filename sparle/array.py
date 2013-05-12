@@ -2,10 +2,6 @@
 __author__ = 'Taylor "Nekroze" Lawson'
 __email__ = 'nekroze@eturnilnetwork.com'
 from . import parle
-try:
-    from blist import blist as list
-except ImportError:
-    pass
 
 
 class Array(object):
@@ -46,10 +42,15 @@ class Array(object):
     def __getitem__(self, index):
         """Return a stored value at the given index."""
         if isinstance(index, slice):
-            return parle.get_value_slice(self.sparle, self._default,
-                                         *index.indices(len(self)))
-        #    return [parle.get_value(self.sparle, pos, self._default)
-        #            for pos in xrange(*index.indices(len(self)))]
+            start, stop, step = (index.start, index.stop, index.step)
+            if start == -1:
+                start = len(self)-1
+            if stop == -1:
+                stop = len(self)-1
+            return [parle.get_value(self.sparle, pi, self._default)
+                    for pi in xrange(0 if start is None else start,
+                                     len(self) if stop is None else stop,
+                                     1 if step is None else step)]
         else:
             return parle.get_value(self.sparle, index, self._default)
 
@@ -60,11 +61,8 @@ class Array(object):
     def __setitem__(self, index, value):
         """Store the given value at the index position."""
         if isinstance(index, slice):
-            self.sparle = parle.set_value_slice(self.sparle, value,
-                                                self._default,
-                                                *index.indices(len(self)))
-            #for pos, val in zip(xrange(*index.indices(len(self))), value):
-            #    parle.set_value(self.sparle, pos, val, self._default)
+            parle.set_value_slice(self.sparle, value, self._default,
+                                  index.start, index.stop)
         else:
             return parle.set_value(self.sparle, index, value, self._default)
 

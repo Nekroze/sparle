@@ -59,13 +59,12 @@ class Test_SPARLE_Array(object):
         assert data[2] in arr
         assert "a" not in arr
 
-    def test_get_slice(self):
+    def test_slice(self):
         arr = Array(data)
 
         assert arr[1:-1] == data[1:-1]
-
-    def test_set_slice(self):
-        arr = Array(data)
+        assert arr[1:] == data[1:]
+        assert arr[:2] == data[:2]
 
         arr[1:-1] = [2, 2]
         assert arr.sparle == [expected[0], (3, 1, 2)]
@@ -74,3 +73,14 @@ class Test_SPARLE_Array(object):
         assert arr[2] == 2
         assert arr[3] == 2
         assert arr[:] == [data[0], 2, 2, data[-1]]
+
+    def test_slice_sparce(self):
+        arr = Array(data)
+        expecteddata = data + ([0]*6) + [100]
+
+        assert arr[:10] == data + ([0]*6)
+
+        arr[10:11] = [100]
+        assert arr.sparle == expected + [(1, 10, 100)]
+        assert arr.get_values() == expecteddata
+        assert arr[:] == expecteddata

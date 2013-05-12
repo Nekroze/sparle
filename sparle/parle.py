@@ -3,10 +3,6 @@ __author__ = 'Taylor "Nekroze" Lawson'
 __email__ = 'nekroze@eturnilnetwork.com'
 from itertools import groupby
 from bisect import bisect_left, bisect_right
-try:
-    from blist import blist as list
-except ImportError:
-    pass
 
 
 def encode(values, default=0, offset=0,):
@@ -43,7 +39,7 @@ def decode(rles, default):
 
     for length, pos, value in rles:
         if pos > len(output):
-            output.extend([default] * pos-len(output))
+            output.extend([default] * (pos-len(output)))
         output.extend([value] * length)
     return output
 
@@ -76,38 +72,57 @@ def get_value_length(rles):
 
 def get_value_slice(rles, default, start, stop, step):
     """Return a slice of the given parle array."""
+    if step is None:
+        step = 1
+    end = rles[-1][1] + rles[-1][0]-1
+    begin = rles[0][1]
     if not len(rles):
         return [default] * (stop-start)
+    elif start is None and stop is None:
+        return decode(rles, default)[::step]
+
     if start is None:
         start = 0
     if stop is None:
         stop = get_value_length(rles)
-    if step is None:
-        step = 1
-    keys = [r[1] for r in rles]
-    groupstop = bisect_left(keys, stop) - 1
-    groupstart = bisect_right(keys, start) + 1
 
-    startrlev = get_rle(rles, start)
-    stoprlev = get_rle(rles, stop)
+    sliceend = stop
+    slicebegin = start
+    if end > stop:
+        sliceend = stop
+    elif begin < start:
+        slicebegin = start
+
+    keys = [r[1] for r in rles]
+    groupstop = bisect_left(keys, sliceend) - 1
+    groupstart = bisect_right(keys, slicebegin) + 1
+
+    startrlev = get_rle(rles, slicebegin)
+    stoprlev = get_rle(rles, sliceend)
     midrles = rles[groupstart:groupstop]
 
-    first = [startrlev[2]] * (startrlev[0] - (start - startrlev[1])) \
-        if startrlev else [default] * (rles[groupstart][1] - start)
+    first = [startrlev[2]] * (startrlev[0] - (slicebegin - startrlev[1])) \
+        if startrlev else [default] * (rles[groupstart][1] - slicebegin)
+    if start < slicebegin:
+        first = [default] * (slicebegin-start) + first
 
     mid = [] if not midrles else decode(midrles, default)
 
-    last = [stoprlev[2]] * (stop - stoprlev[1]) \
-        if stoprlev else [default] * (stop - rles[groupstop][1])
+    last = [stoprlev[2]] * (sliceend - stoprlev[1]) \
+        if stoprlev else [default] * (sliceend - rles[groupstop][1])
+    if stop > sliceend:
+        last = last + ([default] * (stop - sliceend))
     return (first + mid + last) if step == 1 else (first + mid + last)[::step]
 
 
-def set_value_slice(rles, values, default, start, stop, step):
+def set_value_slice(rles, values, default, start, stop):
     """Set a slice of values."""
-    rlevs = decode(rles, default)
-    rlevs[start:stop:step] = values
-    rles = encode(rlevs, default)
-    return rles
+    if start < get_value_length(rles):
+        rlevs = decode(rles, default)
+        rlevs[start:stop] = values
+        rles[:] = encode(rlevs, default)
+    else:
+        rles.extend(encode(values, default, start))
 
 
 def set_value(rles, index, value, default):
