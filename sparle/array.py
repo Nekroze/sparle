@@ -48,19 +48,18 @@ class Array(object):
         if isinstance(index, slice):
             return [parle.get_value(self.sparle, pos, self._default)
                     for pos in xrange(*index.indices(len(self)))]
-        return parle.get_value(self.sparle, index, self._default)
+        else:
+            return parle.get_value(self.sparle, index, self._default)
 
     def get_values(self):
         """Return all stored values in the Array instance."""
-        return parle.get_values(self.sparle, self._default)
+        return parle.decode(self.sparle, self._default)
 
     def __setitem__(self, index, value):
         """Store the given value at the index position."""
         if isinstance(index, slice):
             for pos, val in zip(xrange(*index.indices(len(self))), value):
-                print pos, val
                 parle.set_value(self.sparle, pos, val, self._default)
-            return None
         else:
             return parle.set_value(self.sparle, index, value, self._default)
 

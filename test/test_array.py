@@ -67,5 +67,10 @@ class Test_SPARLE_Array(object):
     def test_set_slice(self):
         arr = Array(data)
 
-        #arr[1:-1] = [2, 2]
-        #assert arr[:] == [data[0], 2, 2, data[-1]]
+        arr[1:-1] = [2, 2]
+        assert arr[:] == [data[0], 2, 2, data[-1]]
+        assert arr.sparle == [expected[0], (3, 1, 2)]
+        assert arr[0] == 5
+        assert arr[1] == 2
+        assert arr[2] == 2
+        assert arr[3] == 2

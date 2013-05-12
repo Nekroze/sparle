@@ -24,25 +24,23 @@ def encode(values, offset=0):
 def get_value(rles, index, default):
     """Return a stored value at the given index."""
     rlev = get_rle(rles, index)
-    return default if not rlev else rlev[2]
+    if rlev is None or index < rlev[1] or index >= rlev[1] + rlev[0]:
+        return default
+    else:
+        return rlev[2]
 
 
-def get_values(rles, default):
-    """Return all stored values in the Array instance."""
+def decode(rles, default):
+    """Return all stored values in the RLE's."""
     output = list()
     if rles[0][1]:
         output.append(default)
         output *= rles[0][1]
 
     for length, pos, value in rles:
-        if pos >= len(output):
-            temp = list([default])
-            temp *= pos - len(output)
-            output.extend(temp)
-
-        temp = list([value])
-        temp *= length
-        output.extend(temp)
+        if pos > len(output):
+            output.extend([default] * pos-len(output))
+        output.extend([value] * length)
     return output
 
 
@@ -59,7 +57,7 @@ def get_rle_index(rles, index):
     keys = [r[1] for r in rles]
     groupindex = bisect_left(keys, index)
     if groupindex >= len(rles):
-        return None
+        groupindex -= 1
     if rles[groupindex][1] > index:
         groupindex -= 1
     if groupindex < 0:
