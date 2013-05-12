@@ -46,8 +46,10 @@ class Array(object):
     def __getitem__(self, index):
         """Return a stored value at the given index."""
         if isinstance(index, slice):
-            return [parle.get_value(self.sparle, pos, self._default)
-                    for pos in xrange(*index.indices(len(self)))]
+            return parle.get_value_slice(self.sparle, self._default,
+                                         *index.indices(len(self)))
+        #    return [parle.get_value(self.sparle, pos, self._default)
+        #            for pos in xrange(*index.indices(len(self)))]
         else:
             return parle.get_value(self.sparle, index, self._default)
 

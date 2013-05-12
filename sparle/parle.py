@@ -2,19 +2,21 @@
 __author__ = 'Taylor "Nekroze" Lawson'
 __email__ = 'nekroze@eturnilnetwork.com'
 from itertools import groupby
-from bisect import bisect_left
+from bisect import bisect_left, bisect_right
 try:
     from blist import blist as list
 except ImportError:
     pass
 
 
-def encode(values, offset=0):
+def encode(values, default=0, offset=0,):
     """Run-Length Encode the given values with offset."""
     groups = groupby(values)
     encoded = list()
     position = 0
     for name, group in groups:
+        if name == default:
+            continue
         length = len(list(group))
         encoded.append((length, position + offset, name))
         position += length
@@ -32,6 +34,8 @@ def get_value(rles, index, default):
 
 def decode(rles, default):
     """Return all stored values in the RLE's."""
+    if not rles:
+        return []
     output = list()
     if rles[0][1]:
         output.append(default)
@@ -65,6 +69,39 @@ def get_rle_index(rles, index):
     return groupindex
 
 
+def get_value_length(rles):
+    """Return the length of values defined in the given RLE's."""
+    return rles[-1][1] + rles[-1][0] - rles[0][1]
+
+
+def get_value_slice(rles, default, start, stop, step):
+    """Return a slice of the given parle array."""
+    if not len(rles):
+        return [default] * (stop-start)
+    if start is None:
+        start = 0
+    if stop is None:
+        stop = get_value_length(rles)
+    if step is None:
+        step = 1
+    keys = [r[1] for r in rles]
+    groupstop = bisect_left(keys, stop) - 1
+    groupstart = bisect_right(keys, start) + 1
+
+    startrlev = get_rle(rles, start)
+    stoprlev = get_rle(rles, stop)
+    midrles = rles[groupstart:groupstop]
+
+    first = [startrlev[2]] * (startrlev[0] - (start - startrlev[1])) \
+        if startrlev else [default] * (rles[groupstart][1] - start)
+
+    mid = [] if not midrles else decode(midrles, default)
+
+    last = [stoprlev[2]] * (stop - stoprlev[1]) \
+        if stoprlev else [default] * (stop - rles[groupstop][1])
+    return (first + mid + last) if step == 1 else (first + mid + last)[::step]
+
+
 def set_value(rles, index, value, default):
     """Store the given value at the index position."""
     if value == default:
@@ -87,7 +124,7 @@ def set_value(rles, index, value, default):
     groupstart = rles[start][1]
     values[index - groupstart] = value
 
-    rles[start:end + 1] = encode(values, offset=groupstart)
+    rles[start:end + 1] = encode(values, default, groupstart)
 
 
 def set_values(rles, values, default):
