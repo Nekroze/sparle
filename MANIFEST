@@ -3,5 +3,7 @@ README.rst
 setup.py
 sparle/__init__.py
 sparle/array.py
+sparle/ndsparle.py
 sparle/parle.py
 test/test_array.py
+test/test_ndsparle.py
