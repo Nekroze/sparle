@@ -70,6 +70,14 @@ class Array(object):
         """Erase the Array then encode and store all values."""
         return parle.set_values(self.sparle, values, self._default)
 
+    def set_rles(self, values):
+        """Erase the Array then store values as the internal SPARLE list."""
+        self.sparle = values
+
+    def __str__(self):
+        """Return the string representation of the SPARLE Array."""
+        return str(self.sparle)
+
     def __delitem__(self, index):
         """Delete the single value at the given index."""
         return parle.delete_value(self.sparle, index)
