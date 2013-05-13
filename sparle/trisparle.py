@@ -14,7 +14,7 @@ class TriSPARLE(list):
         super(TriSPARLE, self).__init__([[Array(default=default)
                                          for _ in xrange(depth)]
                                          for _ in xrange(width)])
-        if Values is not None:
+        if loadstring:
             self.load_from_string(loadstring)
 
     def load_from_string(self, string):
