@@ -117,14 +117,17 @@ def SetValue(sparles as List, index as int, value as int,
     groupstart as int = sparle[1]
     values[index-groupstart] = value
 
-    sparles[start:end+1] = Encode(values, default, groupstart)
+    newer = sparles[:start] + Encode(values, default, groupstart) + sparles[end:]
+    sparles.Clear()
+    sparles.Extend(newer)
 
 def SetValueSlice(sparles as List, values as List, default as int,
                   start as int, stop as int):
     if start < GetValueLength(sparles):
         sparlevs = Decode(sparles, default)
-        sparlevs[start:stop] = values
-        sparles[:] = Encode(sparlevs, default, 0)
+        sparlevs = sparlevs[:start] + values + sparlevs[stop:]
+        sparles.Clear()
+        sparles.Extend(Encode(sparlevs, default, 0))
     else:
         sparles.Extend(Encode(values, default, start))
 
