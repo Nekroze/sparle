@@ -73,8 +73,8 @@ def GetValue(sparles as list, index as postype, default as valtype):
 def GetValueLength(sparles as list):
     return sparles[-1][1] + sparles[-1][0]-1
 
-def SetValue(sparles as list, index as postype, value as valtype, default as
-             valtype):
+def SetValue(sparles as list, index as postype, value as valtype,
+             default as valtype):
     if value == default:
         return delete_value(sparles, index)
     if not len(sparles):
@@ -98,6 +98,15 @@ def SetValue(sparles as list, index as postype, value as valtype, default as
     values[index-groupstart] = value
 
     sparles[start:end+1] = encode(values, default, groupstart)
+
+def SetValueSlice(sparles as list, values as list, default as valtype,
+                  start as postype, stop as postype):
+    if start < GetValueLength(sparles):
+        sparlevs = Decode(sparles, default)
+        sparlevs[start:stop] = values
+        sparles[:] = Encode(sparlevs, default)
+    else:
+        sparles.Extend(Encode(values, default, start))
 
 def DeleteSPARLE(sparles as list, index as postype):
     keys = [r[1] for r in sparles]
