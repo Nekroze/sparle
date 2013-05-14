@@ -71,7 +71,7 @@ def GetValue(sparles as list, index as postype, default as valtype):
         return rlev[2]
 
 def GetValueLength(sparles as list):
-    return sparles[-1][1] + sparles[-1][0]-1
+    return sparles[-1][1] + sparles[-1][0] - sparles[0][1]
 
 def SetValue(sparles as list, index as postype, value as valtype,
              default as valtype):
