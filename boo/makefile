@@ -29,7 +29,12 @@ E_END="\033[0m"
 ##################################################
 .PHONY: all test clean
 
-all:
+all: bin/sparle.dll
+
+bin/sparle.dll: $(SOURCES)
+	$(E_GREEN)"::::Compiling SPARLE Library"$(E_END)
+	@mkdir -p bin
+	$(BOOC) -o:$@ $^
 
 test: bin/unittests.dll
 	$(E_GREEN)"::::Executing Unit Tests"$(E_END)
@@ -37,9 +42,9 @@ test: bin/unittests.dll
 
 bin/unittests.dll: $(TESTS) $(SOURCES)
 	$(E_BLUE)"::::Compiling Unit Tests"$(E_END)
-	mkdir -p bin
+	@mkdir -p bin
 	$(BOOUNIT) -o:$@ $^
 
 clean:
 	$(E_RED)"::::Removing Binaries"$(E_END)
-	rm -rf bin/*
+	rm -rf bin
