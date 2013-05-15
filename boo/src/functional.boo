@@ -1,11 +1,5 @@
 namespace Sparle.Functional
 
-def BisectLeft(values as List, index as int):
-    for pos as int, val as int in enumerate(values):
-        if not val < index:
-            return pos-1
-    return len(values)-1
-
 def Group(values as List):
     val = values[0]
     run = 0
@@ -53,39 +47,15 @@ def Decode(sparles as List, default as int):
 def Decode(values as List):
     return Decode(values, 0)
 
-def GetSPARLEIndex(sparles as List, index as int):
-    if not len(sparles):
-        return null
-
-    keys = [r[1] for r as List in sparles]
-    groupindex = BisectLeft(keys, index)
-
-    if groupindex >= len(sparles):
-        groupindex -= 1
-    sparle as List = sparles[groupindex]
-    pos as int = sparle[1]
-    if pos > index:
-        groupindex -= 1
-    if groupindex < 0:
-        return -1
-    return groupindex
-
-def GetSPARLE(sparles as List, index as int) as List:
-    groupindex = GetSPARLEIndex(sparles, index)
-    if groupindex == -1:
-        return null
-    else:
-        return sparles[groupindex]
-
 def GetValue(sparles as List, index as int, default as int):
-    sparle = GetSPARLE(sparles, index)
-    run as int = sparle[0]
-    pos as int = sparle[1]
-    value = sparle[2]
-    if sparle is null or index < pos or index >= pos + run:
-        return default
-    else:
-        return value
+    for run as int, pos as int, value as int in sparles:
+        if pos > index:
+            return default
+        elif index >= pos and index < pos + run:
+            return value
+
+def GetValue(sparles as List, index as int):
+    return GetValue(sparles, index, 0)
 
 def GetValueLength(sparles as List):
     first as List = sparles[0]
@@ -95,25 +65,19 @@ def GetValueLength(sparles as List):
     firstpos as int = first[1]
     return lastpos + lastrun - firstpos
 
-def SetValue(sparles as List, index as int, value as int,
-             default as int):
+def SetValue(sparles as List, index as int, value as int, default as int):
     if value == default:
         return DeleteValue(sparles, index)
     if not len(sparles):
         return sparles.Add([1, index, value])
 
-
-    keys = [r[1] for r as List in sparles]
-    groupindex = BisectLeft(keys, index)
-
-    if groupindex >= len(sparles):
-        groupindex -= 1
-
-    sparle as List = sparles[groupindex]
-    pos as int = sparle[1]
-    if pos > index:
-        groupindex -= 1
-
+    groupindex = 0
+    for run as int, pos as int, value as int in sparles:
+        if pos > index:
+            return null
+        elif index >= pos and index < pos + run:
+            break
+        groupindex += 1
     start = groupindex
     start = groupindex-1 if groupindex > 0
     end = groupindex
@@ -121,7 +85,7 @@ def SetValue(sparles as List, index as int, value as int,
 
     values = Decode(sparles[start:end+1], default)
 
-    sparle = sparles[start]
+    sparle as List = sparles[start]
     groupstart as int = sparle[1]
     values[index-groupstart] = value
 
@@ -129,9 +93,15 @@ def SetValue(sparles as List, index as int, value as int,
     sparles.Clear()
     sparles.Extend(newer)
 
+def SetValue(sparles as List, index as int, value as int):
+    return SetValue(sparles, index, value, 0)
+
 def SetValueSlice(sparles as List, values as List, default as int,
                   start as int, stop as int):
-    if start < GetValueLength(sparles):
+    length = GetValueLength(sparles)
+    if stop == -1:
+        stop = length-1
+    if start < length:
         sparlevs = Decode(sparles, default)
         sparlevs = sparlevs[:start] + values + sparlevs[stop:]
         sparles.Clear()
@@ -139,27 +109,17 @@ def SetValueSlice(sparles as List, values as List, default as int,
     else:
         sparles.Extend(Encode(values, default, start))
 
-def DeleteSPARLE(sparles as List, index as int):
-    keys = [r[1] for r as List in sparles]
-    groupindex = BisectLeft(keys, index)
-    sparle as List = sparles[groupindex]
-    pos as int = sparle[1]
-    if groupindex >= len(sparles) or pos > index:
-        return null
-    sparles.RemoveAt(groupindex)
-
 def DeleteValue(sparles as List, index as int):
-    groupindex = GetSPARLEIndex(sparles, index)
-    if groupindex is null or not len(sparles):
-        return null
-    sparle as List = sparles[groupindex]
-    run as int = sparle[0]
-    pos as int = sparle[1]
-    value = sparle[2]
-
-    if run <= 1:
-        return DeleteSPARLE(sparles, index)
-    elif pos == index:
-        sparles[groupindex] = [run-1, pos+1, value]
-    else:
-        sparles[groupindex] = [run-1, pos, value]
+    groupindex = 0
+    for run as int, pos as int, value as int in sparles:
+        if pos > index:
+            return null
+        elif index >= pos and index < pos + run:
+            if run <= 1:
+                sparles.RemoveAt(groupindex)
+            elif pos == index:
+                sparles[groupindex] = [run-1, pos+1, value]
+            else:
+                sparles[groupindex] = [run-1, pos, value]
+            break
+        groupindex += 1

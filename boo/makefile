@@ -37,6 +37,7 @@ test: bin/unittests.dll
 
 bin/unittests.dll: $(TESTS) $(SOURCES)
 	$(E_BLUE)"::::Compiling Unit Tests"$(E_END)
+	mkdir -p bin
 	$(BOOUNIT) -o:$@ $^
 
 clean:
