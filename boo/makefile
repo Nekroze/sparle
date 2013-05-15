@@ -1,13 +1,13 @@
 ##################################################
 #Build Variables
 ##################################################
-SOURCES=src/functional.boo
+SOURCES=src/functional.boo src/sparlist.boo
 BOOC=booc
 
 ##################################################
 #Testing and Documentation Variables
 ##################################################
-TESTS=test/functional.boo
+TESTS=test/functional.boo test/sparlist.boo
 TESTER=@nunit-console -nologo -noresult -labels
 BOOUNIT=booc -r:nunit.framework
 

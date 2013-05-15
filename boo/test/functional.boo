@@ -71,18 +71,18 @@ class FunctionalFixture:
     [Test]
     def TestSetValueSlice():
         sparles = Encode([1,2,3,4,5])
-        SetValueSlice(sparles, [6,7,8], 0, 1, 4)
+        SetValueSlice(sparles, [6,7,8], 1, 4)
         Assert.AreEqual([1,6,7,8,5], Decode(sparles, 0),
                         "Flat Slice Value")
         sparles = Encode([1,2,3,4,5])
-        SetValueSlice(sparles, [6,0,8], 0, 1, 4)
+        SetValueSlice(sparles, [6,0,8], 1, 4)
         Assert.AreEqual([1,6,0,8,5], Decode(sparles, 0),
                         "Defaulting Slice Value")
         sparles = Encode([1,2,3,4,5])
-        SetValueSlice(sparles, [0,0,0], 0, 1, 4)
+        SetValueSlice(sparles, [0,0,0], 1, 4)
         Assert.AreEqual([1,0,0,0,5], Decode(sparles, 0),
                         "Clearing Slice Value")
         sparles = Encode([1,2,3,4,5])
-        SetValueSlice(sparles, [0,0,0], 0, 1, -1)
+        SetValueSlice(sparles, [0,0,0], 1, -1)
         Assert.AreEqual([1,0,0,0,5], Decode(sparles, 0),
                         "Clearing Slice Value")

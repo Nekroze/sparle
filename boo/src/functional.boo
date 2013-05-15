@@ -58,12 +58,10 @@ def GetValue(sparles as List, index as int):
     return GetValue(sparles, index, 0)
 
 def GetValueLength(sparles as List):
-    first as List = sparles[0]
     last as List = sparles[-1]
     lastrun as int = last[0]
     lastpos as int = last[1]
-    firstpos as int = first[1]
-    return lastpos + lastrun - firstpos
+    return lastpos + lastrun
 
 def SetValue(sparles as List, index as int, value as int, default as int):
     if value == default:
@@ -96,8 +94,8 @@ def SetValue(sparles as List, index as int, value as int, default as int):
 def SetValue(sparles as List, index as int, value as int):
     return SetValue(sparles, index, value, 0)
 
-def SetValueSlice(sparles as List, values as List, default as int,
-                  start as int, stop as int):
+def SetValueSlice(sparles as List, values as List, start as int, stop as int,
+                  default as int):
     length = GetValueLength(sparles)
     if stop == -1:
         stop = length-1
@@ -108,6 +106,9 @@ def SetValueSlice(sparles as List, values as List, default as int,
         sparles.Extend(Encode(sparlevs, default, 0))
     else:
         sparles.Extend(Encode(values, default, start))
+
+def SetValueSlice(sparles as List, values as List, start as int, stop as int):
+    SetValueSlice(sparles, values, start, stop, 0)
 
 def DeleteValue(sparles as List, index as int):
     groupindex = 0
