@@ -6,4 +6,4 @@ class FunctionalFixture:
 
     [Test]
     def EncodeTest():
-        assert 1
+        assert Encode(List(range(5)), 0, 0) == range(5)
