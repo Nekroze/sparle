@@ -25,30 +25,33 @@ def Encode(values as List, default as int, offset as int):
         if value == default:
             position += run
             continue
-        output.Add([run, position, value])
+        output.Add([run, position+offset, value])
         position += run
     return output
 
 def Encode(values as List, default as int):
     return Encode(values, default, 0)
 
+def Encode(values as List):
+    return Encode(values, 0, 0)
+
 def Decode(sparles as List, default as int):
     if not len(sparles):
         return []
-    output = []
 
+    output = []
     sparle as List = sparles[0]
     pos as int = sparle[1]
-    if pos:
-        output = [default] * pos
-    else:
-        output = []
+    output = [default] * pos if pos > 0
 
-    for run as int, pos as int, value as int in sparles:
-        if pos > len(sparles):
+    for run as int, pos as int, value in sparles:
+        if pos >= len(output):
             output.Extend([default] * (pos-len(output)))
         output.Extend([value] * run)
     return output
+
+def Decode(values as List):
+    return Decode(values, 0)
 
 def GetSPARLEIndex(sparles as List, index as int):
     if not len(sparles):
