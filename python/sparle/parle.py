@@ -19,15 +19,6 @@ def encode(values, default=0, offset=0,):
     return encoded
 
 
-def get_value(rles, index, default):
-    """Return a stored value at the given index."""
-    rlev = get_rle(rles, index)
-    if rlev is None or index < rlev[1] or index >= rlev[1] + rlev[0]:
-        return default
-    else:
-        return rlev[2]
-
-
 def decode(rles, default):
     """Return all stored values in the RLE's."""
     if not rles:
@@ -44,30 +35,19 @@ def decode(rles, default):
     return output
 
 
-def get_rle(rles, index):
-    """Get the RLE field that contains the given index else None."""
-    groupindex = get_rle_index(rles, index)
-    return None if groupindex is None else rles[groupindex]
-
-
-def get_rle_index(rles, index):
-    """Get the index of the RLE field that contians the given index."""
-    if not len(rles):
-        return None
-    keys = [r[1] for r in rles]
-    groupindex = bisect_left(keys, index)
-    if groupindex >= len(rles):
-        groupindex -= 1
-    if rles[groupindex][1] > index:
-        groupindex -= 1
-    if groupindex < 0:
-        return None
-    return groupindex
+def get_value(rles, index, default):
+    """Return a stored value at the given index."""
+    for run, pos, value in rles:
+        if pos > index:
+            return default
+        if pos <= index < pos+run:
+            return value
+    return default
 
 
 def get_value_length(rles):
     """Return the length of values defined in the given RLE's."""
-    return rles[-1][1] + rles[-1][0] - rles[0][1]
+    return rles[-1][1] + rles[-1][0]
 
 
 def get_value_slice(rles, default, start, stop, step):
@@ -117,7 +97,10 @@ def get_value_slice(rles, default, start, stop, step):
 
 def set_value_slice(rles, values, default, start, stop):
     """Set a slice of values."""
-    if start < get_value_length(rles):
+    length = get_value_length(rles)
+    if stop == -1:
+        stop = length-1
+    if start < length:
         rlevs = decode(rles, default)
         rlevs[start:stop] = values
         rles[:] = encode(rlevs, default)
@@ -132,12 +115,13 @@ def set_value(rles, index, value, default):
     if not len(rles):
         return rles.append((1, index, value))
 
-    keys = [r[1] for r in rles]
-    group = bisect_left(keys, index)
-    if group >= len(rles):
-        group -= 1
-    if rles[group][1] > index:
-        group -= 1
+    groupindex = 0
+    for run, pos, value in sparles:
+        if pos > index:
+            return None
+        elif index >= pos and index < pos + run:
+            break
+        groupindex += 1
 
     start = group - 1 if group > 0 else group
     end = group + 1 if group < len(rles) else group
@@ -152,36 +136,20 @@ def set_value(rles, index, value, default):
 
 def set_values(rles, values, default):
     """Erase the Array then encode and store all values."""
-    del rles[:]
-    groups = groupby(values)
-    position = 0
-    for value, group in groups:
-        if value == default:
-            continue
-        length = len(list(group))
-        rles.append((length, position, value))
-        position += length
+    rles[:] = encode(values, default)
 
 
-def delete_rle(rles, index):
-    """Delete the RLE field that contains the given index."""
-    keys = [r[1] for r in rles]
-    group = bisect_left(keys, index)
-    if group >= len(rles) or rles[group][1] > index:
-        return None
-    del rles[group]
-
-
-def delete_value(rles, index):
-    """Delete the single value at the given index."""
-    groupindex = get_rle_index(rles, index)
-    if groupindex is None or not rles:
-        return None
-    rlev = rles[groupindex]
-
-    if rlev[0] <= 1:
-        return delete_rle(rles, index)
-    elif rlev[1] == index:
-        rles[groupindex] = (rlev[0]-1, rlev[1]+1, rlev[2])
-    else:
-        rles[groupindex] = (rlev[0]-1, rlev[1], rlev[2])
+def delete_value(sparles, index):
+    groupindex = 0
+    for run, pos, value in sparles:
+        if pos > index:
+            break
+        elif pos <= index < pos+run:
+            if run <= 1:
+                del sparles[groupindex]
+            elif pos == index:
+                sparles[groupindex] = [run-1, pos+1, value]
+            else:
+                sparles[groupindex] = [run-1, pos, value]
+            break
+        groupindex += 1
