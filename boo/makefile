@@ -1,15 +1,16 @@
 ##################################################
 #Build Variables
 ##################################################
-SOURCES=src/functional.boo src/sparlist.boo
-BOOC=booc
+SOURCES=src/functional.boo src/sparlist.boo src/sparlematrix.boo
+PLATFORM=anycpu
+BOOC=booc -platform:$(PLATFORM)
 
 ##################################################
 #Testing and Documentation Variables
 ##################################################
-TESTS=test/functional.boo test/sparlist.boo
+TESTS=test/functional.boo test/sparlist.boo test/sparlematrix.boo
 TESTER=@nunit-console -nologo -noresult -labels
-BOOUNIT=booc -r:nunit.framework
+BOOUNIT=booc -r:nunit.framework -platform:$(PLATFORM)
 
 ##################################################
 #Color output
@@ -27,9 +28,15 @@ E_END="\033[0m"
 ##################################################
 #Targets
 ##################################################
-.PHONY: all test clean
+.PHONY: all test compile-tests clean mono-aot
 
 all: bin/sparle.dll
+
+nix-aot: bin/sparle.dll.so
+
+bin/sparle.dll.so: bin/sparle.dll
+	$(E_GREEN)"::::Ahead Of Time Compiling SPARLE Library with mono"$(E_END)
+	mono --aot -O=all $<
 
 bin/sparle.dll: $(SOURCES)
 	$(E_GREEN)"::::Compiling SPARLE Library"$(E_END)
@@ -39,6 +46,8 @@ bin/sparle.dll: $(SOURCES)
 test: bin/unittests.dll
 	$(E_GREEN)"::::Executing Unit Tests"$(E_END)
 	$(TESTER) $<
+
+compile-tests: bin/unittests.dll
 
 bin/unittests.dll: $(TESTS) $(SOURCES)
 	$(E_BLUE)"::::Compiling Unit Tests"$(E_END)
