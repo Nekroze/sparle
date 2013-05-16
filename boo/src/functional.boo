@@ -48,7 +48,7 @@ def Decode(values as List):
     return Decode(values, 0)
 
 def GetValue(sparles as List, index as int, default):
-    for run as int, pos as int, value as int in sparles:
+    for run as int, pos as int, value in sparles:
         if pos > index:
             return default
         elif index >= pos and index < pos + run:

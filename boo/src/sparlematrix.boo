@@ -4,7 +4,7 @@ import Sparle.SparList
 class SparleMatrix:
     _sparles as (SparList, 2)
 
-    def constructor(width as int, depth as int, default as int):
+    def constructor(width as int, depth as int, default):
         _sparles = matrix(SparList, width, depth)
         for x in range(len(_sparles,0)):
             for y in range(len(_sparles,1)):
@@ -25,7 +25,7 @@ class SparleMatrix:
     def GetValueLength(x as int, y as int):
         return _sparles[x, y].GetValueLength()
 
-    def SetValue(x as int, y as int, z as int, value as int):
+    def SetValue(x as int, y as int, z as int, value):
         return _sparles[x, y].SetValue(z, value)
 
     def SetValueSlice(x as int, y as int, values as List,

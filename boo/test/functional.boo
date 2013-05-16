@@ -50,6 +50,11 @@ class FunctionalFixture:
                         "Sparse Offset Expected Get Value")
 
     [Test]
+    def TestObjectStorage():
+        Assert.AreEqual([1], GetValue(Encode([[1]]), 0),
+                        "Flat Expected Object Storage")
+
+    [Test]
     def TestSetValue():
         sparles = Encode([1,2])
         SetValue(sparles, 0, 5)

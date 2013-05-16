@@ -2,13 +2,13 @@ namespace Sparle.SparList
 
 class SparList:
     _sparles as List
-    _default as int
+    _default as object
 
-    def constructor(values as List, default as int):
+    def constructor(values as List, default):
         _sparles = Sparle.Functional.Encode(values, default)
         _default = default
 
-    def constructor(default as int):
+    def constructor(default as object):
         _sparles = List()
         _default = default
 
@@ -29,7 +29,7 @@ class SparList:
     def GetValueLength():
         return Sparle.Functional.GetValueLength(_sparles)
 
-    def SetValue(index as int, value as int):
+    def SetValue(index as int, value):
         return Sparle.Functional.SetValue(_sparles, index, value, _default)
 
     def SetValueSlice(values as List, start as int, stop as int):
