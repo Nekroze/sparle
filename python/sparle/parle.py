@@ -2,7 +2,6 @@
 __author__ = 'Taylor "Nekroze" Lawson'
 __email__ = 'nekroze@eturnilnetwork.com'
 from itertools import groupby
-from bisect import bisect_left, bisect_right
 
 
 def encode(values, default=0, offset=0,):
@@ -50,51 +49,6 @@ def get_value_length(rles):
     return rles[-1][1] + rles[-1][0]
 
 
-def get_value_slice(rles, default, start, stop, step):
-    """Return a slice of the given parle array."""
-    if step is None:
-        step = 1
-    end = rles[-1][1] + rles[-1][0]-1
-    begin = rles[0][1]
-    if not len(rles):
-        return [default] * (stop-start)
-    elif start is None and stop is None:
-        return decode(rles, default)[::step]
-
-    if start is None:
-        start = 0
-    if stop is None:
-        stop = get_value_length(rles)
-
-    sliceend = stop
-    slicebegin = start
-    if end > stop:
-        sliceend = stop
-    elif begin < start:
-        slicebegin = start
-
-    keys = [r[1] for r in rles]
-    groupstop = bisect_left(keys, sliceend) - 1
-    groupstart = bisect_right(keys, slicebegin) + 1
-
-    startrlev = get_rle(rles, slicebegin)
-    stoprlev = get_rle(rles, sliceend)
-    midrles = rles[groupstart:groupstop]
-
-    first = [startrlev[2]] * (startrlev[0] - (slicebegin - startrlev[1])) \
-        if startrlev else [default] * (rles[groupstart][1] - slicebegin)
-    if start < slicebegin:
-        first = [default] * (slicebegin-start) + first
-
-    mid = [] if not midrles else decode(midrles, default)
-
-    last = [stoprlev[2]] * (sliceend - stoprlev[1]) \
-        if stoprlev else [default] * (sliceend - rles[groupstop][1])
-    if stop > sliceend:
-        last = last + ([default] * (stop - sliceend))
-    return (first + mid + last) if step == 1 else (first + mid + last)[::step]
-
-
 def set_value_slice(rles, values, default, start, stop):
     """Set a slice of values."""
     length = get_value_length(rles)
@@ -116,15 +70,15 @@ def set_value(rles, index, value, default):
         return rles.append((1, index, value))
 
     groupindex = 0
-    for run, pos, value in sparles:
+    for run, pos, value in rles:
         if pos > index:
             return None
         elif index >= pos and index < pos + run:
             break
         groupindex += 1
 
-    start = group - 1 if group > 0 else group
-    end = group + 1 if group < len(rles) else group
+    start = groupindex - 1 if groupindex > 0 else groupindex
+    end = groupindex + 1 if groupindex < len(rles) else groupindex
 
     values = sum([length * [item] for length, _, item in
                   rles[start:end+1]], [])
@@ -140,6 +94,7 @@ def set_values(rles, values, default):
 
 
 def delete_value(sparles, index):
+    """Delete the single value at the given index."""
     groupindex = 0
     for run, pos, value in sparles:
         if pos > index:
