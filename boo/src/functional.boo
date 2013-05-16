@@ -53,6 +53,7 @@ def GetValue(sparles as List, index as int, default as int):
             return default
         elif index >= pos and index < pos + run:
             return value
+    return default
 
 def GetValue(sparles as List, index as int):
     return GetValue(sparles, index, 0)
@@ -114,7 +115,7 @@ def DeleteValue(sparles as List, index as int):
     groupindex = 0
     for run as int, pos as int, value as int in sparles:
         if pos > index:
-            return null
+            break
         elif index >= pos and index < pos + run:
             if run <= 1:
                 sparles.RemoveAt(groupindex)
