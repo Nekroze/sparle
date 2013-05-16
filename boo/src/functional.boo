@@ -23,13 +23,13 @@ def Encode(values as List, default as int, offset as int):
         position += run
     return output
 
-def Encode(values as List, default as int):
+def Encode(values as List, default):
     return Encode(values, default, 0)
 
 def Encode(values as List):
     return Encode(values, 0, 0)
 
-def Decode(sparles as List, default as int):
+def Decode(sparles as List, default):
     if not len(sparles):
         return []
 
@@ -47,7 +47,7 @@ def Decode(sparles as List, default as int):
 def Decode(values as List):
     return Decode(values, 0)
 
-def GetValue(sparles as List, index as int, default as int):
+def GetValue(sparles as List, index as int, default):
     for run as int, pos as int, value as int in sparles:
         if pos > index:
             return default
@@ -64,9 +64,10 @@ def GetValueLength(sparles as List):
     lastpos as int = last[1]
     return lastpos + lastrun
 
-def SetValue(sparles as List, index as int, value as int, default as int):
+def SetValue(sparles as List, index as int, value, default):
     if value == default:
-        return DeleteValue(sparles, index)
+        DeleteValue(sparles, index)
+        return
     if not len(sparles):
         return sparles.Add([1, index, value])
 
@@ -92,11 +93,11 @@ def SetValue(sparles as List, index as int, value as int, default as int):
     sparles.Clear()
     sparles.Extend(newer)
 
-def SetValue(sparles as List, index as int, value as int):
+def SetValue(sparles as List, index as int, value):
     return SetValue(sparles, index, value, 0)
 
 def SetValueSlice(sparles as List, values as List, start as int, stop as int,
-                  default as int):
+                  default):
     length = GetValueLength(sparles)
     if stop == -1:
         stop = length-1
