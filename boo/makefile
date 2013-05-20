@@ -1,14 +1,14 @@
 ##################################################
 #Build Variables
 ##################################################
-SOURCES=src/functional.boo src/sparlist.boo src/sparlematrix.boo
+SOURCES=src/*.boo
 PLATFORM=anycpu
 BOOC=booc -platform:$(PLATFORM)
 
 ##################################################
 #Testing and Documentation Variables
 ##################################################
-TESTS=test/functional.boo test/sparlist.boo test/sparlematrix.boo
+TESTS=test/*.boo
 TESTER=@nunit-console -nologo -noresult -labels
 BOOUNIT=booc -r:nunit.framework -platform:$(PLATFORM)
 

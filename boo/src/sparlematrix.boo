@@ -1,20 +1,20 @@
 namespace Sparle.SparleMatrix
-import Sparle.SparList
+import Sparle.SparleList
 
 class SparleMatrix:
-    _sparles as (SparList, 2)
+    _sparles as (SparleList, 2)
 
     def constructor(width as int, depth as int, default):
-        _sparles = matrix(SparList, width, depth)
+        _sparles = matrix(SparleList, width, depth)
         for x in range(len(_sparles,0)):
             for y in range(len(_sparles,1)):
-                _sparles[x, y] = SparList(default)
+                _sparles[x, y] = SparleList(default)
 
     def constructor(width as int, depth as int):
-        _sparles = matrix(SparList, width, depth)
+        _sparles = matrix(SparleList, width, depth)
         for x in range(len(_sparles,0)):
             for y in range(len(_sparles,1)):
-                _sparles[x, y] = SparList(0)
+                _sparles[x, y] = SparleList(0)
 
     def GetValues(x as int, y as int):
         return _sparles[x, y].GetValues()

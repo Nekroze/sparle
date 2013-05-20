@@ -1,6 +1,6 @@
-namespace Sparle.SparList
+namespace Sparle.SparleList
 
-class SparList:
+class SparleList:
     _sparles as List
     _default as object
 
