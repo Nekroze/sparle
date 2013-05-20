@@ -7,7 +7,7 @@ class SparleTable:
     def constructor():
         space = {}
 
-    def GetSparle(x as long, z as long) as SparleList:
+    def GetSparle(x as long, y as long) as SparleList:
         return space[(x, y)]
 
     def GetVoxel(x as long, y as long, height as int):
