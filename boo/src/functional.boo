@@ -12,7 +12,7 @@ def Group(values as List):
             run = 1
     yield [val, run]
 
-def Encode(values as List, default as int, offset as int):
+def Encode(values as List, default as int, offset as uint):
     output = []
     position = 0
     for value, run as int in Group(values):
@@ -47,7 +47,7 @@ def Decode(sparles as List, default):
 def Decode(values as List):
     return Decode(values, 0)
 
-def GetValue(sparles as List, index as int, default):
+def GetValue(sparles as List, index as uint, default):
     for run as int, pos as int, value in sparles:
         if pos > index:
             return default
@@ -55,7 +55,7 @@ def GetValue(sparles as List, index as int, default):
             return value
     return default
 
-def GetValue(sparles as List, index as int):
+def GetValue(sparles as List, index as uint):
     return GetValue(sparles, index, 0)
 
 def GetValueLength(sparles as List):
@@ -64,7 +64,7 @@ def GetValueLength(sparles as List):
     lastpos as int = last[1]
     return lastpos + lastrun
 
-def SetValue(sparles as List, index as int, value, default):
+def SetValue(sparles as List, index as uint, value, default):
     if value == default:
         DeleteValue(sparles, index)
         return
@@ -93,7 +93,7 @@ def SetValue(sparles as List, index as int, value, default):
     sparles.Clear()
     sparles.Extend(newer)
 
-def SetValue(sparles as List, index as int, value):
+def SetValue(sparles as List, index as uint, value):
     return SetValue(sparles, index, value, 0)
 
 def SetValueSlice(sparles as List, values as List, start as int, stop as int,
@@ -112,7 +112,7 @@ def SetValueSlice(sparles as List, values as List, start as int, stop as int,
 def SetValueSlice(sparles as List, values as List, start as int, stop as int):
     SetValueSlice(sparles, values, start, stop, 0)
 
-def DeleteValue(sparles as List, index as int):
+def DeleteValue(sparles as List, index as uint):
     groupindex = 0
     for run as int, pos as int, value as int in sparles:
         if pos > index:

@@ -23,13 +23,13 @@ class SparleList:
     def GetValues():
         return Sparle.Functional.Decode(_sparles, _default)
 
-    def GetValue(index as int):
+    def GetValue(index as uint):
         return Sparle.Functional.GetValue(_sparles, index, _default)
 
     def GetValueLength():
         return Sparle.Functional.GetValueLength(_sparles)
 
-    def SetValue(index as int, value):
+    def SetValue(index as uint, value):
         return Sparle.Functional.SetValue(_sparles, index, value, _default)
 
     def SetValueSlice(values as List, start as int, stop as int):
