@@ -14,7 +14,7 @@ class Array(object):
     not store any entries of a specific value that is given as the default.
     This default will be returned when retreiving an unset index.
 
-    By combining these the Array can space at the slight cost of performance
+    By combining these the Array can save space at the slight cost of performance
     especially when storing an array of highly repeating values that may have a
     single more common value. A good example of this might be a voxel
     representation of space, Much of the space may be the same values in a row
